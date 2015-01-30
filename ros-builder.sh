@@ -1,0 +1,230 @@
+#! /bin/bash
+#
+# Build script to build ROS from source on Ubuntu (and probably Debian)
+# The script installs required packages, grabs ROS sources, builds and installs ROS
+# 
+# The ROS version (among other things) can be provided using the scripts arguments.
+#
+# The scripts should (might!) work on all Ubuntu (-based) systems with all ROS versions,
+# but it is actually tested with:
+#  * 64-bit Kubuntu 14.10 with indigo (ros_comm variant)
+
+set -e
+if [ $EUID -eq 0 ]; then
+  echo "${0##*/} must not be run as root" 1>&2
+  exit 1
+fi
+
+CURRENT_DIR=$(pwd)
+CLEANUP=0
+BUILD_DIR=
+ROS_DISTRO=indigo
+VERBOSE=0
+NO_UPDATE=0
+TWO_STEPS=0
+INSTALL_DIR=
+INSTALL_TYPE=
+INSTALLED_PACKAGES=
+LIBRARY_ARCHITECTURE=$(dpkg-architecture -qDEB_BUILD_MULTIARCH)
+
+trap cleanup EXIT
+
+usage() {
+  cat << EOF
+Usage: ${0##*/} [-hcUv] [-a ARCHITECTURE] [-b BUILD_DIR] [-d ROS_DISTRIBUTION] [-i INSTALL_DIR] [-t INSTALLATION_VARIANT]
+Create or update installation directory from source, install dependencies and (re)build ROS
+If INSTALL_VARIANT is not provided, it is guessed from the build location (if a build already exists)
+    -2 use 2-steps, first building then installing, instead of one. Building without installing is faster (convenient when building fails due to missing packages), but installing afterwards takes additional time.
+    -a specify library architecture, for multi-arch systems (current: $LIBRARY_ARCHITECTURE)
+    -b specify the build directory (current: build/ros_<ROS_DISTRIBUTION>_catkin_ws/)
+    -c cleanup after execution (removes *all* installed packages during *this* execution of the script)
+    -d selects which ROS distribution is used (current: $ROS_DISTRO)
+    -h displays this help and exit
+    -i specify the installation directory (current: $ROS_DISTRO)
+    -t type (variant) of installation, most common types are desktop_full, desktop (recommended) or ros-base
+       Note that when updating an exiting build with a different type might break the build/installation.
+    -U do not update sources, only rebuild ROS installation from existing build directory.
+    -v verbose mode. Prints paths that are going to be used and waits until user accepts.
+EOF
+  exit 0
+}
+
+# $1 list of packages that need to be installed
+install() {
+  local PACKAGES_TO_INSTALL=
+  for PACKAGE in $*; do
+    if [ $(dpkg-query -W --showformat='${Status}\n' $PACKAGE 2>/dev/null | grep -c "install ok installed") -eq 0 ]; then
+      PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL $PACKAGE"
+    fi
+  done
+  if [ -n "$PACKAGES_TO_INSTALL" ]; then
+    echo "Installing $PACKAGES_TO_INSTALL"
+    INSTALLED_PACKAGES="$INSTALLED_PACKAGES $PACKAGES_TO_INSTALL"
+    sudo apt-get install -y $PACKAGES_TO_INSTALL
+  fi
+}
+
+cleanup() {
+  cd $CURRENT_DIR
+
+  if [ -n "$INSTALLED_PACKAGES" ]; then
+    echo
+    echo
+    echo "The following packages have been installed:"
+    echo $INSTALLED_PACKAGES
+    echo
+    if [ $CLEANUP -eq 1 ]; then
+      echo "Cleaning up: Removing the installed packages again."
+      sudo apt-get -q remove $INSTALLED_PACKAGES
+      sudo apt-get -qq autoremove
+    else
+      echo "Feel free to remove them (if you do not require them for something else)"
+    fi
+  fi
+}
+
+while getopts "2a:b:cd:hi:t:Uv" opt; do
+  case "$opt" in
+    2)
+      TWO_STEPS=1
+      ;;
+    a)
+      LIBRARY_ARCHITECTURE=$OPTARG
+      ;;
+    b)
+      BUILD_DIR=$(readlink -m $OPTARG)
+      ;;
+    c)
+      CLEANUP=1
+      ;;
+    d)
+      ROS_DISTRO=$OPTARG
+      ;;
+    h|\?)
+      usage
+      ;;
+    i)
+      INSTALL_DIR=$(readlink -m $OPTARG)
+      ;;
+    t)
+      INSTALL_TYPE=$OPTARG
+      ;;
+    U)
+      NO_UPDATE=1
+      ;;
+    v)
+      VERBOSE=1
+      ;;
+  esac
+done
+
+if [ -z "$BUILD_DIR" ]; then
+  BUILD_DIR=$(readlink -m build/ros_${ROS_DISTRO}_catkin_ws/)
+fi
+if [ -z "$INSTALL_DIR" ]; then
+  INSTALL_DIR=$ROS_DISTRO
+fi
+INSTALL_DIR=$(readlink -m $INSTALL_DIR)
+if [ -d $BUILD_DIR ]; then
+  CLEAN_BUILD=0
+else
+  CLEAN_BUILD=1
+fi
+if [ -z "$INSTALL_TYPE" ]; then
+  if [ -f $BUILD_DIR/$ROS_DISTRO-*-wet.rosinstall ]; then
+    INSTALL_TYPE=$(ls $BUILD_DIR/$ROS_DISTRO-*-wet.rosinstall | sed -e "s/.*\/$ROS_DISTRO-\(.*\)-wet.rosinstall/\1/")
+  else
+    INSTALL_TYPE=desktop
+  fi
+fi
+if [ $CLEAN_BUILD -eq 0 -a ! -f $BUILD_DIR/$ROS_DISTRO-$INSTALL_TYPE-wet.rosinstall ]; then
+  # .rosinstall file not found, handle as new/clean installation, instead of an update
+  CLEAN_BUILD=1
+fi
+
+if [ $VERBOSE -eq 1 ]; then
+  cat << EOF
+ROS distribution:      $ROS_DISTRO
+Build location:        $BUILD_DIR
+Installation location: $INSTALL_DIR
+Installation type:     $INSTALL_TYPE (see http://www.ros.org/reps/rep-0131.html#variants)
+Library architecture:  $LIBRARY_ARCHITECTURE
+EOF
+
+  echo
+  if [ $CLEAN_BUILD -eq 0 ]; then
+    if [ $NO_UPDATE -eq 0 ]; then
+      echo "Build location already exists, going to update ROS $ROS_DISTRO"
+    else
+      echo "Build location already exists, only going to rebuild ROS $ROS_DISTRO"
+    fi
+  else
+    echo "Build location does not exist, going to install ROS $ROS_DISTRO"
+  fi
+  echo
+
+  read -p "Press [Enter] key to start..."
+  echo
+fi
+
+if [ ! -f /etc/apt/sources.list.d/ros-latest.list ]; then
+  echo "Adding ROS repository"
+  sudo rm -rf /etc/apt/sources.list.d/ros-latest.list
+  sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main\" > /etc/apt/sources.list.d/ros-latest.list"
+  wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | sudo apt-key add -
+fi
+
+echo "Installing required ROS tools (that are required to 'bootstrap' ROS building)"
+install build-essential python-rosinstall-generator python-wstool
+  
+echo "Installing required boost libraries to build ROS"
+# Note libboost version 1.55 is working
+install libboost-dev libboost-system-dev libboost-thread-dev libboost-program-options-dev
+
+echo "Installing other libraries that are required to build ROS"
+install libtinyxml-dev libpython-dev python-nose liblz4-dev libbz2-dev libconsole-bridge-dev
+
+if [ $CLEAN_BUILD -eq 1 ]; then
+  echo "Creating ROS build workspace"
+  [ -d $BUILD_DIR ] && rm -r $BUILD_DIR
+  mkdir -p $BUILD_DIR
+  cd $BUILD_DIR
+  rosinstall_generator $INSTALL_TYPE --rosdistro $ROS_DISTRO --deps --wet-only --tar > $ROS_DISTRO-$INSTALL_TYPE-wet.rosinstall
+  wstool init -j8 src $ROS_DISTRO-$INSTALL_TYPE-wet.rosinstall
+elif [ $NO_UPDATE -eq 0 ]; then
+  echo "Updating ROS build workspace (getting newest versions)"
+  cd $BUILD_DIR
+  rosinstall_generator $INSTALL_TYPE --rosdistro $ROS_DISTRO --deps --wet-only --tar > $ROS_DISTRO-$INSTALL_TYPE-wet.rosinstall.new
+  diff $ROS_DISTRO-$INSTALL_TYPE-wet.rosinstall{,.new}
+  if [ $? -ne 0 ]; then
+    if [ $VERBOSE -eq 1]; then
+      echo "The following is getting udpated:"
+      diff -u $ROS_DISTRO-$INSTALL_TYPE-wet.rosinstall{,.new}
+      read -p "Press [enter] to continue..."
+    fi
+    mv $ROS_DISTRO-$INSTALL_TYPE-wet.rosinstall{.new,}
+    wstool merge -j8 -t src $ROS_DISTRO-$INSTALL_TYPE-wet.rosinstall
+  fi
+  wstool update -j8 -t src
+fi
+
+echo "(Re)building ROS $ROS_DISTRO installation"
+cd $BUILD_DIR
+# CMAKE_LIBRARY_ARCHITECTURE is used by find_library (cmake function) to find the paths to required libraries (basically it specifies /usr/lib/<ARCH>)
+ARGS=-DCMAKE_LIBRARY_ARCHITECTURE=$LIBRARY_ARCHITECTURE
+
+if [ $TWO_STEPS -eq 1 ]; then
+  # It is faster to first build and then install (when building fails a couple of times due to missing dependencies)
+  ./src/catkin/bin/catkin_make_isolated -DCMAKE_BUILD_TYPE=Release $ARGS
+fi
+./src/catkin/bin/catkin_make_isolated --install --install-space=$INSTALL_DIR -DCMAKE_BUILD_TYPE=Release $ARGS
+
+cat << EOF
+Finished
+To use the newly build ROS distribution, make sure to 'source' it:
+
+  source $INSTALL_DIR/setup.bash
+
+
+EOF
+
