@@ -1,4 +1,4 @@
-# ros-builder
+# ROS builder
 
 Build script to build [ROS](http://www.ros.org/) from source on Ubuntu (and probably Debian).
 The script installs required packages, grabs ROS sources, builds and installs ROS.
@@ -12,7 +12,7 @@ Big disadvantage is that one has to manually find out what packages are missing,
 
 When rerunning the script (e.g. after installing a missing package) adding `-U` flag prevents updating the sources, which decrease the build times (considerably, depending on your internet speed).
 
-## Installation
+## Installation and Usage
 
 The script can be obtained by [downloading ](https://raw.githubusercontent.com/veger/ros-builder/master/ros-builder.sh) it or by cloning this repository.
 
@@ -24,11 +24,11 @@ Assuming you have the script in the current directory use the following to show 
 $ ./ros-install.sh -h
 Usage: ros-builder.sh [-hcUv] [-a ARCHITECTURE] [-b BUILD_DIR] [-d ROS_DISTRIBUTION] [-i INSTALL_DIR] [-t INSTALLATION_VARIANT]
 Create or update installation directory from source, install dependencies and (re)build ROS.
-If INSTALL_VARIANT is not provided, it is guessed from the build location (if a build already exists).
+If INSTALLATION_VARIANT is not provided, it is guessed from the build location (if a build already exists).
   -2 use 2-steps, first building then installing, instead of one.
   -a specify library architecture, for multi-arch systems.
   -b specify the build directory.
-  -c cleanup after execution (removes *all* installed packages during *this* execution of the script).
+  -c cleanup after execution.
   -d selects which ROS distribution is used.
   -h displays this help and exit.
   -i specify the installation directory.
@@ -38,6 +38,9 @@ If INSTALL_VARIANT is not provided, it is guessed from the build location (if a 
   -v verbose mode. Prints paths that are going to be used and waits until user accepts.
 ```
 <sup>(Note that the actual help output is slightly more explaining)</sup>
+
+The script does not require to be execute with root permissions (if it is, an error is thrown), if root permissions are required (e.g. to isnstall required packages) the user is asked for a password (using the `sudo` command).
+I believe this is more safe, and the file permissions are correct for the current user (so it is easier to use).
 
 ## Tested
 
