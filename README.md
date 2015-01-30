@@ -1,8 +1,9 @@
 # ROS builder
 
-Build script to build [ROS](http://www.ros.org/) from source on Ubuntu (and probably Debian).
+ROS Build script to build [ROS](http://www.ros.org/) from source on Ubuntu (and probably Debian).
 The script installs required packages, grabs ROS sources, builds and installs ROS.
-Basically as described on the [ROS wiki](http://wiki.ros.org/indigo/Installation/Source) with some minor alterations.
+With the build directory (produced by the script) available, the script is able to update your ROS installation so you have the newest version again.
+The script does basically the same as described on the [ROS wiki](http://wiki.ros.org/indigo/Installation/Source).
 
 *Note that the compiling ROS requires a lot of dependencies.* So it is likely that the script fails to build ROS due to missing dependencies. This is not a problem, except you need to find teh correct (Ubuntu) packages that fullfills the requirement.
 
@@ -16,7 +17,7 @@ When rerunning the script (e.g. after installing a missing package) adding `-U` 
 
 The script can be obtained by [downloading ](https://raw.githubusercontent.com/veger/ros-builder/master/ros-builder.sh) it or by cloning this repository.
 
-It does not really matter where to put it, as it is (probably) used only once, it does not make snese to 'install' it by putting it in `/usr/bin`.
+It does not really matter where to put it, as it is (probably) used only once, it does not make sense to 'install' it by putting it in `/usr/bin`.
 
 Assuming you have the script in the current directory use the following to show the scripts help:
 
