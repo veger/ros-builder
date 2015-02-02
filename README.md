@@ -47,5 +47,6 @@ I believe this is more safe, and the file permissions are correct for the curren
 
 The scripts should (might!) work on all Ubuntu (-based) systems with all ROS versions, but it is actually tested with:
  * 64-bit Kubuntu 14.10 with indigo (ros_comm variant)
+ * 64-bit Kubuntu 14.10 with indigo (desktop variant)
 
  Please let me know when you have (sucessfully) use the script on/with any (other) OS, ROS version or variant.
