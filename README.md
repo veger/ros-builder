@@ -1,6 +1,6 @@
 # ROS builder
 
-ROS Build script to build [ROS](http://www.ros.org/) from source on Ubuntu (and probably Debian).
+Build script to build [ROS](http://www.ros.org/) from source on Ubuntu (and probably Debian).
 The script installs required packages, grabs ROS sources, builds and installs ROS.
 With the build directory (produced by the script) available, the script is able to update your ROS installation so you have the newest version again.
 The script does basically the same as described on the [ROS wiki](http://wiki.ros.org/indigo/Installation/Source).

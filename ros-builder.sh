@@ -5,9 +5,7 @@
 # 
 # The ROS version (among other things) can be provided using the scripts arguments.
 #
-# The scripts should (might!) work on all Ubuntu (-based) systems with all ROS versions,
-# but it is actually tested with:
-#  * 64-bit Kubuntu 14.10 with indigo (ros_comm variant)
+# See https://github.com/veger/ros-builder for more information
 
 set -e
 if [ $EUID -eq 0 ]; then
