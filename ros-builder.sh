@@ -185,15 +185,11 @@ install libtinyxml-dev libpython-dev python-nose liblz4-dev libbz2-dev libconsol
 if [ "$INSTALL_TYPE" = "desktop" -o "$INSTALL_TYPE" = "desktop_full" ]; then
   install libpoco-dev libeigen3-dev libqt4-dev python-qt4-dev libshiboken-dev libpyside-dev libcurl4-gnutls-dev libboost-python-dev libopencv-dev python-numpy liburdfdom-dev libqhull-dev libassimp-dev libogre-1.9-dev libyaml-cpp-dev
 
-  if [ ! -f /etc/apt/sources.list.d/openrave-ubuntu-release-utopic.list ]; then
-    echo "Adding OpenRAVE repository"
-    sudo rm -rf /etc/apt/sources.list.d/openrave-ubuntu-release-utopic.list
-    # TODO Build own collada-dom package, so it works without 'sed hacks' (and slightly incorrect version of boost)
-    sudo add-apt-repository -y ppa:openrave/release
-    if [ "$(lsb_release -sc)" = "utopic" ]; then
-      # No utopic packages available, use the trusty packages...
-      sudo sed -i -e 's/utopic/trusty/g' /etc/apt/sources.list.d/openrave-ubuntu-release-utopic.list
-    fi
+  OS_DISTRO=$(lsb_release -sc)
+  if [ ! -f /etc/apt/sources.list.d/veger-ubuntu-ppa-${OS_DISTRO}.list ]; then
+    echo "Adding Veger repository"
+    [ -d /etc/apt/sources.list.d/veger-ubuntu-ppa-${OS_DISTRO}.list ] && sudo rm -r /etc/apt/sources.list.d/veger-ubuntu-ppa-${OS_DISTRO}.list
+    sudo add-apt-repository -y ppa:veger/ppa
     sudo apt-get update
   fi
   install collada-dom-dev
