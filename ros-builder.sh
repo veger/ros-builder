@@ -47,8 +47,11 @@ EOF
   exit 0
 }
 
-# $1 list of packages that need to be installed
+# $1 "keep" to keep packages (i.e. not getting added to INSTALLED_PACKAGES), otherwise first package of list
+# $2 list of packages that need to be installed
 install() {
+  local KEEP=$1
+  [ "$KEEP" = "keep" ] && shift
   local PACKAGES_TO_INSTALL=
   for PACKAGE in $*; do
     if [ $(dpkg-query -W --showformat='${Status}\n' $PACKAGE 2>/dev/null | grep -c "install ok installed") -eq 0 ]; then
@@ -57,7 +60,9 @@ install() {
   done
   if [ -n "$PACKAGES_TO_INSTALL" ]; then
     echo "Installing $PACKAGES_TO_INSTALL"
-    INSTALLED_PACKAGES="$INSTALLED_PACKAGES $PACKAGES_TO_INSTALL"
+    if [ "$KEEP" != "keep" ]; then
+      INSTALLED_PACKAGES="$INSTALLED_PACKAGES $PACKAGES_TO_INSTALL"
+    fi
     sudo apt-get install -y $PACKAGES_TO_INSTALL
   fi
 }
@@ -229,6 +234,9 @@ if [ $TWO_STEPS -eq 1 ]; then
   ./src/catkin/bin/catkin_make_isolated -DCMAKE_BUILD_TYPE=Release $ARGS
 fi
 ./src/catkin/bin/catkin_make_isolated --install --install-space=$INSTALL_DIR -DCMAKE_BUILD_TYPE=Release $ARGS
+
+echo "Installing libraries that are required to run ROS"
+install keep python-netifaces
 
 cat << EOF
 Finished
