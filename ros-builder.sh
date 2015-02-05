@@ -24,6 +24,7 @@ INSTALL_DIR=
 INSTALL_TYPE=
 INSTALLED_PACKAGES=
 LIBRARY_ARCHITECTURE=$(dpkg-architecture -qDEB_BUILD_MULTIARCH)
+OS_DISTRO=$(lsb_release -sc)
 
 trap cleanup EXIT
 
@@ -170,10 +171,9 @@ EOF
   echo
 fi
 
-if [ ! -f /etc/apt/sources.list.d/ros-latest.list ]; then
+if [ ! -f /etc/apt/sources.list.d/ros-${OS_DISTRO}.list ]; then
   echo "Adding ROS repository"
-  sudo rm -rf /etc/apt/sources.list.d/ros-latest.list
-  sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main\" > /etc/apt/sources.list.d/ros-latest.list"
+  sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $OS_DISTRO main\" > /etc/apt/sources.list.d/ros-${OS_DISTRO}.list"
   wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | sudo apt-key add -
 fi
 
@@ -190,7 +190,6 @@ install libtinyxml-dev libpython-dev python-nose liblz4-dev libbz2-dev libconsol
 if [ "$INSTALL_TYPE" = "desktop" -o "$INSTALL_TYPE" = "desktop_full" ]; then
   install libpoco-dev libeigen3-dev libqt4-dev python-qt4-dev libshiboken-dev libpyside-dev libcurl4-gnutls-dev libboost-python-dev libopencv-dev python-numpy liburdfdom-dev libqhull-dev libassimp-dev libogre-1.9-dev libyaml-cpp-dev
 
-  OS_DISTRO=$(lsb_release -sc)
   if [ ! -f /etc/apt/sources.list.d/veger-ubuntu-ppa-${OS_DISTRO}.list ]; then
     echo "Adding Veger repository"
     [ -d /etc/apt/sources.list.d/veger-ubuntu-ppa-${OS_DISTRO}.list ] && sudo rm -r /etc/apt/sources.list.d/veger-ubuntu-ppa-${OS_DISTRO}.list
