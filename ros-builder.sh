@@ -192,7 +192,6 @@ if [ "$INSTALL_TYPE" = "desktop" -o "$INSTALL_TYPE" = "desktop_full" ]; then
 
   if [ ! -f /etc/apt/sources.list.d/veger-ubuntu-ppa-${OS_DISTRO}.list ]; then
     echo "Adding Veger repository"
-    [ -d /etc/apt/sources.list.d/veger-ubuntu-ppa-${OS_DISTRO}.list ] && sudo rm -r /etc/apt/sources.list.d/veger-ubuntu-ppa-${OS_DISTRO}.list
     sudo add-apt-repository -y ppa:veger/ppa
     sudo apt-get update
   fi
