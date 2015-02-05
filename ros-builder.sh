@@ -171,6 +171,8 @@ EOF
     cat << EOF
 
 WARNING: ROS $ROS_DISTRO/$INSTALL_TYPE does not compile completely (yet).
+See patches/$INSTALL_TYPE directory for patches that (parially) fix the compilation/linking problem(s).
+Apply then in $BUILD_DIR to fix (some of) the compilation/linking problems (after the workspace has been initialized).
 
 EOF
   fi

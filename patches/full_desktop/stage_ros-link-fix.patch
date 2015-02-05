@@ -1,0 +1,11 @@
+--- src/stage_ros/CMakeLists.txt.orig	2015-02-05 15:30:24.574036821 +0100
++++ src/stage_ros/CMakeLists.txt	2015-02-05 15:30:39.074037416 +0100
+@@ -38,7 +38,7 @@
+ 
+ # Declare a cpp executable
+ add_executable(stageros src/stageros.cpp)
+-target_link_libraries(stageros ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${FLTK_LIBRARIES} ${Stage_LIBRARIES})
++target_link_libraries(stageros ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${FLTK_LIBRARIES} ${Stage_LIBRARIES} -ldl)
+ if(catkin_EXPORTED_TARGETS)
+ 	add_dependencies(stageros ${catkin_EXPORTED_TARGETS})
+ endif()
