@@ -167,6 +167,14 @@ EOF
   fi
   echo
 
+  if [ "$ROS_DISTRO" = "indigo" -a "$INSTALL_TYPE" = "desktop_full" ]; then
+    cat << EOF
+
+WARNING: ROS $ROS_DISTRO/$INSTALL_TYPE does not compile completely (yet).
+
+EOF
+  fi
+
   read -p "Press [Enter] key to start..."
   echo
 fi
@@ -188,7 +196,7 @@ echo "Installing other libraries that are required to build ROS"
 install libtinyxml-dev libpython-dev python-nose liblz4-dev libbz2-dev libconsole-bridge-dev
 
 if [ "$INSTALL_TYPE" = "desktop" -o "$INSTALL_TYPE" = "desktop_full" ]; then
-  install libpoco-dev libeigen3-dev libqt4-dev python-qt4-dev libshiboken-dev libpyside-dev libcurl4-gnutls-dev libboost-python-dev libopencv-dev python-numpy liburdfdom-dev libqhull-dev libassimp-dev libogre-1.9-dev libyaml-cpp-dev
+  install libpoco-dev libeigen3-dev libqt4-dev python-qt4-dev libshiboken-dev libpyside-dev libcurl4-openssl-dev libboost-python-dev libopencv-dev python-numpy liburdfdom-dev libqhull-dev libassimp-dev libogre-1.9-dev libyaml-cpp-dev
 
   if [ ! -f /etc/apt/sources.list.d/veger-ubuntu-ppa-${OS_DISTRO}.list ]; then
     echo "Adding Veger repository"
@@ -196,6 +204,24 @@ if [ "$INSTALL_TYPE" = "desktop" -o "$INSTALL_TYPE" = "desktop_full" ]; then
     sudo apt-get update
   fi
   install collada-dom-dev
+fi
+
+if [ "$INSTALL_TYPE" = "desktop_full" ]; then
+  install libfltk1.3-dev libtheora-dev
+  if [ ! -f /etc/apt/sources.list.d/v-launchpad-jochen-sprickerhof-de-ubuntu-pcl-${OS_DISTRO}.list ]; then
+    echo "Adding PCL repository"
+    sudo add-apt-repository -y ppa:v-launchpad-jochen-sprickerhof-de/pcl
+    sudo apt-get update
+  fi
+  install libpcl-dev
+  # Ubuntu vivid has gazebo in its repositories
+  if [ "$OS_DISTRO" != "vivid" -a ! -f /etc/apt/sources.list.d/gazebo-${OS_DISTRO}.list ]; then
+    echo "Adding Gazebo $OS_DISTRO repository"
+    sudo sh -c "echo 'deb http://packages.osrfoundation.org/gazebo/ubuntu $OS_DISTRO main' > /etc/apt/sources.list.d/gazebo-${OS_DISTRO}.list"
+    wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+    sudo apt-get update
+  fi
+  install libgazebo5-dev
 fi
 
 if [ $CLEAN_BUILD -eq 1 ]; then
