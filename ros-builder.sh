@@ -185,6 +185,7 @@ if [ ! -f /etc/apt/sources.list.d/ros-${OS_DISTRO}.list ]; then
   echo "Adding ROS repository"
   sudo sh -c "echo \"deb http://packages.ros.org/ros/ubuntu $OS_DISTRO main\" > /etc/apt/sources.list.d/ros-${OS_DISTRO}.list"
   wget https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -O - | sudo apt-key add -
+  sudo apt-get update
 fi
 
 echo "Installing required ROS tools (that are required to 'bootstrap' ROS building)"
