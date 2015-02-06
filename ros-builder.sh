@@ -191,11 +191,11 @@ echo "Installing required ROS tools (that are required to 'bootstrap' ROS buildi
 install build-essential python-rosinstall-generator python-wstool
   
 echo "Installing required boost libraries to build ROS"
-# Note libboost version 1.55 is working
-install libboost-dev libboost-system-dev libboost-thread-dev libboost-program-options-dev
+# Note libboost version 1.55 is working for utopic/indigo
+install libboost-dev libboost-system-dev libboost-filesystem-dev libboost-thread-dev libboost-program-options-dev libboost-regex-dev libboost-signals-dev
 
 echo "Installing other libraries that are required to build ROS"
-install libtinyxml-dev libpython-dev python-nose liblz4-dev libbz2-dev libconsole-bridge-dev
+install libtinyxml-dev libpython-dev python-empy python-nose liblz4-dev libbz2-dev libconsole-bridge-dev
 
 if [ "$INSTALL_TYPE" = "desktop" -o "$INSTALL_TYPE" = "desktop_full" ]; then
   install libpoco-dev libeigen3-dev libqt4-dev python-qt4-dev libshiboken-dev libpyside-dev libcurl4-openssl-dev libboost-python-dev libopencv-dev python-numpy liburdfdom-dev libqhull-dev libassimp-dev libogre-1.9-dev libyaml-cpp-dev
