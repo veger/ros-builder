@@ -5,7 +5,7 @@ The script installs required packages, grabs ROS sources, builds and installs RO
 With the build directory (produced by the script) available, the script is able to update your ROS installation so you have the newest version again.
 The script does basically the same as described on the [ROS wiki](http://wiki.ros.org/indigo/Installation/Source).
 
-*Note that the compiling ROS requires a lot of dependencies.* So it is likely that the script fails to build ROS due to missing dependencies. This is not a problem, except you need to find teh correct (Ubuntu) packages that fullfills the requirement.
+*Note that the compiling ROS requires a lot of dependencies.* So it is likely that the script fails to build ROS due to missing dependencies. This is not a problem, except you need to find the correct (Ubuntu) packages that provides the dependency.
 
 The script does not use [`rosdep`](http://wiki.ros.org/rosdep) to install the required dependencies.
 I feel that it installs far too much (unrequired) packages, which I personally do not like.
@@ -49,4 +49,4 @@ The scripts should (might!) work on all Ubuntu (-based) systems with all ROS ver
  * 64-bit Kubuntu 14.10 with indigo (ros_comm variant)
  * 64-bit Kubuntu 14.10 with indigo (desktop variant)
 
- Please let me know when you have (sucessfully) use the script on/with any (other) OS, ROS version or variant.
+Please let me know when you have (sucessfully) use the script on/with any (other) OS, ROS version or variant.
