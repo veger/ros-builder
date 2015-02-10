@@ -172,7 +172,7 @@ EOF
 
 WARNING: ROS $ROS_DISTRO/$INSTALL_TYPE does not compile completely (yet).
 See patches/$INSTALL_TYPE directory for patches that (parially) fix the compilation/linking problem(s).
-Apply then in $BUILD_DIR to fix (some of) the compilation/linking problems (after the workspace has been initialized).
+Apply them manually to $BUILD_DIR to fix (some of) the compilation/linking problems (after the workspace has been initialized, e.g. before restarting/continuing the build after after it has failed).
 
 EOF
   fi
@@ -259,6 +259,11 @@ ARGS=-DCMAKE_LIBRARY_ARCHITECTURE=$LIBRARY_ARCHITECTURE
 if [ $TWO_STEPS -eq 1 ]; then
   # It is faster to first build and then install (when building fails a couple of times due to missing dependencies)
   ./src/catkin/bin/catkin_make_isolated -DCMAKE_BUILD_TYPE=Release $ARGS
+fi
+if [ "$ROS_DISTRO" = "desktop_full" ]; then
+  # For some reason actionlib_msgs is installed before std_msgs, which results in an error, so
+  echo "First install std_msgs to fix problem with $ROS_DISTRO"
+  ./src/catkin/bin/catkin_make_isolated --install --pkg std_msgs --install-space=$INSTALL_DIR -DCMAKE_BUILD_TYPE=Release $ARGS
 fi
 ./src/catkin/bin/catkin_make_isolated --install --install-space=$INSTALL_DIR -DCMAKE_BUILD_TYPE=Release $ARGS
 
