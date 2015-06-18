@@ -189,7 +189,7 @@ if [ ! -f /etc/apt/sources.list.d/ros-${OS_DISTRO}.list ]; then
 fi
 
 echo "Installing required ROS tools (that are required to 'bootstrap' ROS building)"
-install build-essential python-rosinstall-generator python-wstool
+install build-essential python-rosinstall-generator python-wstool cmake
   
 echo "Installing required boost libraries to build ROS"
 # Note libboost version 1.55 is working for utopic/indigo
